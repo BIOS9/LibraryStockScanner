@@ -54,8 +54,8 @@ namespace LibHax
 
         public Program()
         {
-            byte[] test = { 0x00, 0x05, 0xFE, 0x00, 0x07 };
-            Console.WriteLine(CalcCRC16(test));
+            //byte[] test = {  0x0, 0x19, 0xFE, 0x0, 0x0, 0x7, 0x2, 0x0, 0xE0, 0x4, 0x1, 0x50, 0x1D, 0xDE, 0x16, 0xC7, 0x0, 0xE0, 0x4, 0x1, 0x0, 0x47, 0xAF, 0x5B, 0x38, };
+            //Console.WriteLine(CalcCRC16(test).ToString("X"));
 
             _serial = new SerialPort("COM6", 19200, Parity.None, 8, StopBits.One);
             _serial.Open();
@@ -117,7 +117,6 @@ namespace LibHax
             byte[] crcData = new byte[fullPayload.Length - 3];
             Array.Copy(fullPayload, 1, crcData, 0, crcData.Length);
             ushort crc = CalcCRC16(crcData);
-            Console.WriteLine(crc.ToString("X"));
 
             // Insert CRC into last two bytes of payload
             fullPayload[fullPayload.Length - 2] = (byte)(crc >> 8);
@@ -144,6 +143,20 @@ namespace LibHax
             byte[] data = new byte[dataLength];
             readCount = 0;
             while ((readCount += _serial.Read(data, readCount, data.Length - readCount)) < data.Length);
+
+            byte[] crcData = new byte[data.Length];
+            Array.Copy(header, 1, crcData, 0, 2);
+            Array.Copy(data, 0, crcData, 2, data.Length - 2);
+
+            ushort calculatedCRC = CalcCRC16(crcData);
+
+            byte[] crcSwap = data.Skip(data.Length - 2).Reverse().ToArray();
+            ushort providedCRC = BitConverter.ToUInt16(crcSwap, 0);
+
+            if (calculatedCRC != providedCRC)
+            {
+                throw new Exception("Returned CRC != Calculated CRC");
+            }
 
             return data;
         }
