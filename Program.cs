@@ -67,7 +67,8 @@ namespace LibHax
                 Console.WriteLine($"Found {tags.Count} tags.");
                 foreach (Tag tag in tags)
                 {
-                    Console.WriteLine(tag);
+                    //Console.WriteLine(tag);
+                    Console.WriteLine(getTagData(tag));
                 }
                 Console.WriteLine();
             }
@@ -76,8 +77,8 @@ namespace LibHax
         private List<Tag> getPresentTags()
         {
             byte[] getTagsRequest = { (byte)MessageType.ListTags, 0x00, 0x07 };
-            sendData(getTagsRequest);
-            byte[] getTagsResponse = readData();
+            writeSerialData(getTagsRequest);
+            byte[] getTagsResponse = readSerialData();
 
             if (getTagsResponse[0] != (byte)MessageType.ListTags)
                 throw new Exception("Unexpected response message type.");
@@ -87,14 +88,41 @@ namespace LibHax
             List<Tag> tags = new List<Tag>();
             for(byte i = 0; i < presentTagCount; ++i)
             {
-                int idIndex = 6 + (i * 10); // Skip the header of 5, tag length is 8 bytes + 2 bytes tail
+                int idIndex = 5 + (i * 9); // Skip the header of 5, tag length is 8 bytes + 1 bytes gap
                 byte[] tagID = new byte[8];
-                Array.Copy(getTagsResponse, idIndex, tagID, 0, 8);
+                Array.Copy(getTagsResponse, idIndex + 1, tagID, 0, 8);
                 tags.Add(new Tag(tagID));
             }
-            Console.WriteLine(getTagsResponse.ToReadable());
 
             return tags;
+        }
+
+        private string getTagData(Tag tag)
+        {
+            byte[] readTagRequest = { (byte)MessageType.ReadTag, 
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                0x01, 0x06 
+            };
+            Array.Copy(tag.ID, 0, readTagRequest, 1, 8);
+            writeSerialData(readTagRequest);
+            byte[] readTagResponse = readSerialData();
+
+            if (readTagResponse[0] != (byte)MessageType.ReadTag)
+                throw new Exception("Unexpected response message type.");
+
+            byte[] returnedTagID = readTagRequest.Skip(1).Take(8).ToArray();
+            if(!Enumerable.SequenceEqual(returnedTagID, tag.ID))
+            {
+                throw new Exception("Read ID mismatch.");
+            }
+
+            char[] data = readTagResponse
+                .Skip(13)
+                .TakeWhile(x => x != 3)
+                .Where(x => x >= 48 && x <= 57)
+                .Select(x => (char)x)
+                .ToArray();
+            return new string(data);
         }
 
         /// <summary>
@@ -102,7 +130,7 @@ namespace LibHax
         /// Calculates payload header and CRC.
         /// </summary>
         /// <param name="data">Data to send to the reader.</param>
-        private void sendData(byte[] data)
+        private void writeSerialData(byte[] data)
         {
             if (data.Length > 253)
                 throw new ArgumentException("Data length must be less than 256");
@@ -128,7 +156,7 @@ namespace LibHax
         /// <summary>
         /// Reads data from the reader over serial.
         /// </summary>
-        private byte[] readData()
+        private byte[] readSerialData()
         {
             byte[] header = new byte[3];
             int readCount = 0;
@@ -158,7 +186,7 @@ namespace LibHax
                 throw new Exception("Returned CRC != Calculated CRC");
             }
 
-            return data;
+            return data.Take(data.Length - 2).ToArray();
         }
 
         static void Main(string[] args)
