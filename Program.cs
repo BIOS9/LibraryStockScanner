@@ -22,14 +22,27 @@ namespace LibHax
         {
             public readonly byte[] ID;
 
-            public Tag(byte[] iD)
+            public Tag(byte[] id)
             {
-                ID = iD ?? throw new ArgumentNullException(nameof(iD));
+                ID = id ?? throw new ArgumentNullException(nameof(id));
             }
 
             public override string ToString()
             {
                 return ID.ToReadable();
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null)
+                    return false;
+
+                if (obj.GetType().Equals(obj.GetType()))
+                    return false;
+
+                Tag tag = (Tag)obj;
+
+                return Enumerable.SequenceEqual(ID, tag.ID);
             }
         }
 
@@ -54,23 +67,29 @@ namespace LibHax
 
         public Program()
         {
-            //byte[] test = {  0x0, 0x19, 0xFE, 0x0, 0x0, 0x7, 0x2, 0x0, 0xE0, 0x4, 0x1, 0x50, 0x1D, 0xDE, 0x16, 0xC7, 0x0, 0xE0, 0x4, 0x1, 0x0, 0x47, 0xAF, 0x5B, 0x38, };
-            //Console.WriteLine(CalcCRC16(test).ToString("X"));
-
             _serial = new SerialPort("COM6", 19200, Parity.None, 8, StopBits.One);
             _serial.Open();
             Console.WriteLine("Opened");
 
+            IDictionary<string, string> books = new Dictionary<string, string>();
+
             while (true)
             {
                 List<Tag> tags = getPresentTags();
-                Console.WriteLine($"Found {tags.Count} tags.");
+                //Console.WriteLine($"Found {tags.Count} tags.");
                 foreach (Tag tag in tags)
                 {
-                    //Console.WriteLine(tag);
-                    Console.WriteLine(getTagData(tag));
+                    if (!books.ContainsKey(tag.ToString()))
+                    {
+                        string bookID = getTagData(tag);
+                        if (string.IsNullOrWhiteSpace(bookID))
+                        {
+                            continue;
+                        }
+                        books.Add(tag.ToString(), bookID);
+                        Console.WriteLine($"New book: {bookID}");
+                    }
                 }
-                Console.WriteLine();
             }
         }
 
@@ -99,9 +118,9 @@ namespace LibHax
 
         private string getTagData(Tag tag)
         {
-            byte[] readTagRequest = { (byte)MessageType.ReadTag, 
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                0x01, 0x06 
+            byte[] readTagRequest = { (byte)MessageType.ReadTag,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x01, 0x06
             };
             Array.Copy(tag.ID, 0, readTagRequest, 1, 8);
             writeSerialData(readTagRequest);
@@ -111,9 +130,14 @@ namespace LibHax
                 throw new Exception("Unexpected response message type.");
 
             byte[] returnedTagID = readTagRequest.Skip(1).Take(8).ToArray();
-            if(!Enumerable.SequenceEqual(returnedTagID, tag.ID))
+            if (!Enumerable.SequenceEqual(returnedTagID, tag.ID))
             {
                 throw new Exception("Read ID mismatch.");
+            }
+
+            if (readTagResponse[1] != 0)
+            {
+                return string.Empty;
             }
 
             char[] data = readTagResponse
@@ -122,6 +146,7 @@ namespace LibHax
                 .Where(x => x >= 48 && x <= 57)
                 .Select(x => (char)x)
                 .ToArray();
+
             return new string(data);
         }
 
