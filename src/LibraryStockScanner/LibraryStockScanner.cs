@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace LibHax
+namespace CIA.LibraryStockScanner
 {
-    class Program
+    class LibraryStockScanner
     {
         SerialPort _serial;
 
@@ -65,7 +62,7 @@ namespace LibHax
         }
 
 
-        public Program()
+        public LibraryStockScanner()
         {
             _serial = new SerialPort("COM6", 19200, Parity.None, 8, StopBits.One);
             _serial.Open();
@@ -216,7 +213,7 @@ namespace LibHax
 
         static void Main(string[] args)
         {
-            new Program();
+            new LibraryStockScanner();
             Console.ReadLine();
         }
     }
