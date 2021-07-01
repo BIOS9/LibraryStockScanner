@@ -45,6 +45,11 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         /// <inheritdoc/>
         public ReaderResponse Transceive(ReaderCommand command)
         {
+            if (!this.serialPort.IsOpen)
+            {
+                throw new NotConnectedException("Serial port is not open.");
+            }
+
             return this.tranceiver.Transceive(command);
         }
 

@@ -127,7 +127,7 @@ namespace RfidAssetReader3M.ReaderCommunication
         public ReadOnlySpan<byte> FullResponse => this.fullResponse;
 
         /// <summary>
-        /// Gets a value indicating whether the provided checksum matches the calcluated
+        /// Gets a value indicating whether the provided checksum matches the calculated
         /// checksum of the data.
         /// </summary>
         public bool IsChecksumValid => this.validChecksum;

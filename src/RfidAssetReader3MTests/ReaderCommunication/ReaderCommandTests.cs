@@ -48,6 +48,15 @@ namespace RfidAssetReader3MTests.ReaderCommunication
         };
 
         [Test]
+        public void TestNullArguments()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new ReaderCommand(CommunicationType.Operation, null);
+            });
+        }
+
+        [Test]
         public void TestCommunicationType()
         {
             foreach (CommunicationType t in Enum.GetValues(typeof(CommunicationType)))

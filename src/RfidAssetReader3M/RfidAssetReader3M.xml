@@ -140,7 +140,7 @@
         </member>
         <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.IsChecksumValid">
             <summary>
-            Gets a value indicating whether the provided checksum matches the calcluated
+            Gets a value indicating whether the provided checksum matches the calculated
             checksum of the data.
             </summary>
         </member>

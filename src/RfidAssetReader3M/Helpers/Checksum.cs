@@ -22,9 +22,9 @@ namespace RfidAssetReader3M.Helpers
         public static ushort CalculateCrc16(Span<byte> data)
         {
             ushort crc = 0xFFFF;
-            for (int i = 0; i < data.Length; i++)
+            foreach (var b in data)
             {
-                crc ^= (ushort)(data[i] << 8);
+                crc ^= (ushort)(b << 8);
                 for (int j = 0; j < 8; j++)
                 {
                     if ((crc & 0x8000) > 0)

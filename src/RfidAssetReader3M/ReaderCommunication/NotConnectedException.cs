@@ -7,7 +7,6 @@
 namespace RfidAssetReader3M.ReaderCommunication
 {
     using System;
-    using System.Runtime.Serialization;
 
     /// <summary>
     /// The exception that is thrown when an attempt is made to

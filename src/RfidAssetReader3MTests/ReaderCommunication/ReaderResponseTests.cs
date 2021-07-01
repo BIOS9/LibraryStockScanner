@@ -50,6 +50,34 @@
         };
 
         [Test]
+        public void TestInvalidArguments()
+        {
+            // Null response
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new ReaderResponse(null);
+            });
+
+            // Unknown CommunicationType
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ReaderResponse(new byte[] { 0x00, 0x00,  0x00, 0x00, 0x00, 0x00 });
+            });
+
+            // Space byte not 0
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ReaderResponse(new byte[] { (byte)CommunicationType.Operation, 0x01,  0x00, 0x00, 0x00, 0x00 });
+            });
+
+            // Data length less than 2
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ReaderResponse(new byte[] { (byte)CommunicationType.Operation, 0x00,  0x01, 0x00, 0x00, 0x00 });
+            });
+        }
+
+        [Test]
         public void TestCommunicationType()
         {
             foreach (CommunicationType t in Enum.GetValues(typeof(CommunicationType)))
@@ -80,7 +108,7 @@
                     {
                         Assert.Throws<ArgumentException>(() =>
                         {
-                            ReaderResponse rr = new ReaderResponse(data);
+                            new ReaderResponse(data);
                         });
                     }
                 }
