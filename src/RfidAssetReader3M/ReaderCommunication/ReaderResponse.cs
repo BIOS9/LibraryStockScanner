@@ -14,6 +14,18 @@ namespace RfidAssetReader3M.ReaderCommunication
     /// </summary>
     internal class ReaderResponse
     {
+        /// <summary>
+        /// The maximum possible size of a full response.
+        /// Max size is governed by the max data length (255 bytes) + the header (3 bytes).
+        /// </summary>
+        public const int MaxFullResponseSize = 258;
+
+        /// <summary>
+        /// The minimum possible size of a full response.
+        /// The minimum size is 3 bytes for the header + 2 bytes for the checksum.
+        /// </summary>
+        public const int MinFullResponseSize = 5;
+
         private readonly byte[] fullResponse;
         private readonly byte[] response;
         private readonly byte[] checksum;
@@ -25,40 +37,44 @@ namespace RfidAssetReader3M.ReaderCommunication
         /// </summary>
         /// <param name="fullResponse">Full response from the reader including checksum and header.</param>
         /// <param name="ignoreChecksum">Allows continuing with an invalid checksum.</param>
-        public ReaderResponse(byte[] fullResponse, bool ignoreChecksum = false)
+        public ReaderResponse(Span<byte> fullResponse, bool ignoreChecksum = false)
         {
-            this.fullResponse = fullResponse ?? throw new ArgumentNullException(nameof(fullResponse));
+            if (fullResponse == null)
+            {
+                throw new ArgumentNullException(nameof(fullResponse));
+            }
 
-            // Ensure full response has at least 3 bytes for the header and 2 bytes for the checksum.
-            if (fullResponse.Length < 5)
+            this.fullResponse = fullResponse.ToArray(); // Defensive cloning of fullResponse.
+
+            // Ensure full response is not shorter than the minimum size.
+            if (this.fullResponse.Length < MinFullResponseSize)
             {
                 throw new ArgumentException("Full response must contain at least 5 bytes.", nameof(fullResponse));
             }
 
             // Ensure full response is not longer than the maximum size.
-            // Max size is governed by the max data length (255) + the header (3)
-            if (fullResponse.Length > 258)
+            if (this.fullResponse.Length > MaxFullResponseSize)
             {
                 throw new ArgumentException("Full response is too long.");
             }
 
             // Ensure communication type is an expected value.
-            if (!Enum.IsDefined(typeof(CommunicationType), fullResponse[0]))
+            if (!Enum.IsDefined(typeof(CommunicationType), this.fullResponse[0]))
             {
                 throw new ArgumentException("Unknown communication type.", nameof(fullResponse));
             }
             else
             {
-                this.communicationType = (CommunicationType)fullResponse[0];
+                this.communicationType = (CommunicationType)this.fullResponse[0];
             }
 
             // Ensure that weird space byte is 0 until I figure out what it does.
-            if (fullResponse[1] != 0)
+            if (this.fullResponse[1] != 0)
             {
                 throw new ArgumentException("Unexpected value for byte 2.", nameof(fullResponse));
             }
 
-            byte dataLength = fullResponse[2];
+            byte dataLength = this.fullResponse[2];
 
             // Ensure data length is at least 2 since it includes the checksum.
             if (dataLength < 2)
@@ -67,18 +83,18 @@ namespace RfidAssetReader3M.ReaderCommunication
             }
 
             // Ensure length value matches length of given payload.
-            if (dataLength != fullResponse.Length - 3)
+            if (dataLength != this.fullResponse.Length - 3)
             {
                 throw new ArgumentException("Data length value does not match the length of the actual data.", nameof(fullResponse));
             }
 
             // Allocate and populate response data.
             this.response = new byte[dataLength - 2];
-            Array.Copy(fullResponse, 3, this.response, 0, dataLength - 2);
+            Array.Copy(this.fullResponse, 3, this.response, 0, dataLength - 2);
 
             // Allocate and populate checksum.
             this.checksum = new byte[2];
-            Array.Copy(fullResponse, fullResponse.Length - 2, this.checksum, 0, 2);
+            Array.Copy(this.fullResponse, this.fullResponse.Length - 2, this.checksum, 0, 2);
 
             // Calculate and validate checksum.
             this.validChecksum = this.ValidateChecksum();
