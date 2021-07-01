@@ -17,18 +17,18 @@
             <param name="data">Input data for the checksum calculation.</param>
             <returns>16 bit unsigned integer checksum result.</returns>
         </member>
-        <member name="T:RfidAssetReader3M.ReaderCommunication.CommandType">
+        <member name="T:RfidAssetReader3M.ReaderCommunication.CommunicationType">
             <summary>
             The type of command.
             The reader expects different header values for different command types.
             </summary>
         </member>
-        <member name="F:RfidAssetReader3M.ReaderCommunication.CommandType.Setup">
+        <member name="F:RfidAssetReader3M.ReaderCommunication.CommunicationType.Setup">
             <summary>
             Used in the initial setup of the reader.
             </summary>
         </member>
-        <member name="F:RfidAssetReader3M.ReaderCommunication.CommandType.Operation">
+        <member name="F:RfidAssetReader3M.ReaderCommunication.CommunicationType.Operation">
             <summary>
             Used in the normal operation of the reader to read and write tags.
             </summary>
@@ -56,16 +56,16 @@
             A command to send to the RFID reader.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommandType,System.Byte[])">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommunicationType,System.Byte[])">
             <summary>
             Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand"/> class.
             </summary>
-            <param name="commandType">The command type header byte.</param>
+            <param name="communicationType">The command type header byte.</param>
             <param name="command">Raw command to send to the reader.</param>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.CommandType">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.CommunicationType">
             <summary>
-            Gets the command type header byte.
+            Gets the communication type header byte.
             </summary>
         </member>
         <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.Command">
@@ -88,7 +88,42 @@
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse">
             <summary>
-            A response to a command send back from the reader.
+            A command response sent back from the reader.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderResponse.#ctor(System.Byte[],System.Boolean)">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse"/> class.
+            </summary>
+            <param name="fullResponse">Full response from the reader including checksum and header.</param>
+            <param name="ignoreChecksum">Allows continuing with an invalid checksum.</param>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.CommunicationType">
+            <summary>
+            Gets the communication type header byte.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.Response">
+            <summary>
+            Gets the raw command to send to the reader.
+            This does not include any of the header bytes or the checksum.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.Checksum">
+            <summary>
+            Gets the modified CRC16-CCITT checksum of the data.
+            This checksum matches the format expected by the 3M RFID reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.FullResponse">
+            <summary>
+            Gets the full response from the reader including checksum and header.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.IsChecksumValid">
+            <summary>
+            Gets a value indicating whether the provided checksum matches the calcluated
+            checksum of the data.
             </summary>
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel">

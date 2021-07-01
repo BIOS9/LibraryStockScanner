@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="CommandType.cs" company="CIA">
+// <copyright file="CommunicationType.cs" company="CIA">
 // Copyright (c) CIA. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
@@ -10,7 +10,7 @@ namespace RfidAssetReader3M.ReaderCommunication
     /// The type of command.
     /// The reader expects different header values for different command types.
     /// </summary>
-    public enum CommandType : byte
+    public enum CommunicationType : byte
     {
         /// <summary>
         /// Used in the initial setup of the reader.

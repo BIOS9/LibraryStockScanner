@@ -48,12 +48,12 @@ namespace RfidAssetReader3MTests
         };
 
         [Test]
-        public void TestCommandType()
+        public void TestCommunicationType()
         {
-            foreach (CommandType t in Enum.GetValues(typeof(CommandType)))
+            foreach (CommunicationType t in Enum.GetValues(typeof(CommunicationType)))
             {
                 ReaderCommand rc = new ReaderCommand(t, new byte[0]);
-                Assert.AreEqual(t, rc.CommandType);
+                Assert.AreEqual(t, rc.CommunicationType);
                 Assert.AreEqual((byte)t, rc.FullCommand[0]);
             }
         }
@@ -64,7 +64,7 @@ namespace RfidAssetReader3MTests
             for (int i = 0; i < 253; ++i)
             {
                 byte[] data = new byte[i];
-                ReaderCommand rc = new ReaderCommand(CommandType.Operation, data);
+                ReaderCommand rc = new ReaderCommand(CommunicationType.Operation, data);
                 Assert.AreEqual(0, rc.FullCommand[1]);
                 Assert.AreEqual(i + 2, rc.FullCommand[2]);
                 Assert.AreEqual(data, rc.Command.ToArray());
@@ -74,7 +74,7 @@ namespace RfidAssetReader3MTests
 
             Assert.Throws<ArgumentException>(() =>
             {
-                new ReaderCommand(CommandType.Operation, new byte[254]);
+                new ReaderCommand(CommunicationType.Operation, new byte[254]);
             });
         }
 
@@ -88,7 +88,7 @@ namespace RfidAssetReader3MTests
                 {
                     data[j] = (byte)j.GetHashCode(); // Just filling it with known stuff
                 }
-                ReaderCommand rc = new ReaderCommand(CommandType.Operation, data);
+                ReaderCommand rc = new ReaderCommand(CommunicationType.Operation, data);
                 Assert.AreEqual(0, rc.FullCommand[1]);
                 Assert.AreEqual(data, rc.Command.ToArray());
                 Assert.AreEqual(data, rc.FullCommand.Slice(3, data.Length).ToArray());
@@ -100,7 +100,7 @@ namespace RfidAssetReader3MTests
         {
             foreach (ChecksumTestItem item in testData)
             {
-                ReaderCommand rc = new ReaderCommand(CommandType.Operation, item.command);
+                ReaderCommand rc = new ReaderCommand(CommunicationType.Operation, item.command);
                 Assert.AreEqual(item.expectedChecksum, rc.Checksum.ToArray());
                 Assert.AreEqual(item.expectedChecksum, rc.FullCommand.Slice(rc.FullCommand.Length - 2, 2).ToArray());
             }
@@ -111,7 +111,7 @@ namespace RfidAssetReader3MTests
         {
             foreach (ChecksumTestItem item in testData)
             {
-                ReaderCommand rc = new ReaderCommand(CommandType.Operation, item.command);
+                ReaderCommand rc = new ReaderCommand(CommunicationType.Operation, item.command);
                 byte[] expected = new byte[3 + item.command.Length + 2];
                 expected[0] = 0xD6;
                 expected[2] = (byte)(item.command.Length + 2);
