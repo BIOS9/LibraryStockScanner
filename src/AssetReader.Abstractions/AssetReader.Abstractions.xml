@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AssetReader.Abstractions</name>
+    </assembly>
+    <members>
+        <member name="T:AssetReader.Abstractions.IAssetReader">
+            <summary>
+            Represents a device that reads or scans for assets.
+            An example of such a device might be a barcode scanner or
+            an RFID reader that can scan IDs of books in a library.
+            </summary>
+        </member>
+        <member name="M:AssetReader.Abstractions.IAssetReader.IsReady">
+            <summary>
+            Checks if the reader is ready to read assets.
+            </summary>
+            <returns>Returns true if the reader is ready.</returns>
+        </member>
+    </members>
+</doc>

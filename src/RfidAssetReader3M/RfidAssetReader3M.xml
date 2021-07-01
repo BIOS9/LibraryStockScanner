@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RfidAssetReader3M</name>
+    </assembly>
+    <members>
+        <member name="T:RfidAssetReader3M.Helpers.Checksum">
+            <summary>
+            Contains helper functions for checksum calculation.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.Helpers.Checksum.CalculateCrc16(System.Span{System.Byte})">
+            <summary>
+            Calculates modified CRC16-CCITT.
+            The final output of this CRC is XOR'ed with 0xFFFF.
+            </summary>
+            <param name="data">Input data for the checksum calculation.</param>
+            <returns>16 bit unsigned integer checksum result.</returns>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.CommandType">
+            <summary>
+            The type of command.
+            The reader expects different header values for different command types.
+            </summary>
+        </member>
+        <member name="F:RfidAssetReader3M.ReaderCommunication.CommandType.Setup">
+            <summary>
+            Used in the initial setup of the reader.
+            </summary>
+        </member>
+        <member name="F:RfidAssetReader3M.ReaderCommunication.CommandType.Operation">
+            <summary>
+            Used in the normal operation of the reader to read and write tags.
+            </summary>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.IReaderChannel">
+            <summary>
+            A communication channel between the application
+            and a 3M RFID reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.IReaderChannel.IsReady">
+            <summary>
+            Gets a value indicating whether the channel is ready to communicate.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.IReaderChannel.Tranceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+            <summary>
+            Communicates with a reader by sending a command and then reading the response.
+            </summary>
+            <param name="command">Command that will be sent to the reader.</param>
+            <returns>The response to the command that was sent to the reader.</returns>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand">
+            <summary>
+            A command to send to the RFID reader.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommandType,System.Byte[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand"/> class.
+            </summary>
+            <param name="commandType">The command type header byte.</param>
+            <param name="command">Raw command to send to the reader.</param>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.CommandType">
+            <summary>
+            Gets the command type header byte.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.Command">
+            <summary>
+            Gets the raw command to send to the reader.
+            This does not include any of the header bytes or the checksum.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.Checksum">
+            <summary>
+            Gets the modified CRC16-CCITT checksum of the data.
+            This checksum matches the format expected by the 3M RFID reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.FullCommand">
+            <summary>
+            Gets the full command containing all header information and the checksum.
+            The data is in the format expected by the 3M RFID reader.
+            </summary>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse">
+            <summary>
+            A response to a command send back from the reader.
+            </summary>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel">
+            <summary>
+            A reader channel that uses a serial port for
+            the underlying communication.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel"/> class.
+            </summary>
+            <param name="comPort">Serial Communications Port that is connected to the reader.</param>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.IsReady">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.Tranceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:RfidAssetReader3M.Rfid3MReader">
+            <summary>
+            Reads ISO/IEC 15693 asset tags using a 3M 810 RFID reader.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.Rfid3MReader.IsReady">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>
