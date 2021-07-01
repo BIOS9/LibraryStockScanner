@@ -33,30 +33,36 @@
             Used in the normal operation of the reader to read and write tags.
             </summary>
         </member>
-        <member name="T:RfidAssetReader3M.ReaderCommunication.IReaderChannel">
+        <member name="T:RfidAssetReader3M.ReaderCommunication.NotConnectedException">
             <summary>
-            A communication channel between the application
-            and a 3M RFID reader.
+            The exception that is thrown when an attempt is made to
+            interact with a reader that is not connected.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.IReaderChannel.IsReady">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.NotConnectedException.#ctor">
             <summary>
-            Gets a value indicating whether the channel is ready to communicate.
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.NotConnectedException"/> class.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.IReaderChannel.Tranceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.NotConnectedException.#ctor(System.String)">
             <summary>
-            Communicates with a reader by sending a command and then reading the response.
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.NotConnectedException"/> class.
             </summary>
-            <param name="command">Command that will be sent to the reader.</param>
-            <returns>The response to the command that was sent to the reader.</returns>
+            <param name="message">Exception message.</param>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.NotConnectedException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.NotConnectedException"/> class.
+            </summary>
+            <param name="message">Exception message.</param>
+            <param name="innerException">Inner exception.</param>
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand">
             <summary>
             A command to send to the RFID reader.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommunicationType,System.Byte[])">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommunicationType,System.Span{System.Byte})">
             <summary>
             Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand"/> class.
             </summary>
@@ -91,7 +97,19 @@
             A command response sent back from the reader.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderResponse.#ctor(System.Byte[],System.Boolean)">
+        <member name="F:RfidAssetReader3M.ReaderCommunication.ReaderResponse.MaxFullResponseSize">
+            <summary>
+            The maximum possible size of a full response.
+            Max size is governed by the max data length (255 bytes) + the header (3 bytes).
+            </summary>
+        </member>
+        <member name="F:RfidAssetReader3M.ReaderCommunication.ReaderResponse.MinFullResponseSize">
+            <summary>
+            The minimum possible size of a full response.
+            The minimum size is 3 bytes for the header + 2 bytes for the checksum.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderResponse.#ctor(System.Span{System.Byte},System.Boolean)">
             <summary>
             Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse"/> class.
             </summary>
@@ -126,25 +144,72 @@
             checksum of the data.
             </summary>
         </member>
-        <member name="T:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel">
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver">
+            <summary>
+            Handles low level communication between the application and a 3M RFID reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver.IsReady">
+            <summary>
+            Gets a value indicating whether the channel is ready to communicate.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+            <summary>
+            Communicates with a reader by sending a command and then reading the response.
+            </summary>
+            <param name="command">Command that will be sent to the reader.</param>
+            <returns>The response to the command that was sent to the reader.</returns>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver">
             <summary>
             A reader channel that uses a serial port for
             the underlying communication.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.#ctor(System.String)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.#ctor(System.String)">
             <summary>
-            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel"/> class.
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver"/> class.
             </summary>
             <param name="comPort">Serial Communications Port that is connected to the reader.</param>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.IsReady">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.IsReady">
             <inheritdoc/>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.Tranceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
             <inheritdoc/>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.SerialReaderChannel.Dispose">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.DisposeAsync">
+            <inheritdoc/>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver">
+            <summary>
+            Handles conversion between stream of data between the application and
+            reader to distinct commands and responses.
+            </summary>
+            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver"/>
+            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand"/>
+            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse"/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.#ctor(System.IO.Stream)">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver"/> class.
+            </summary>
+            <param name="stream">RFID Reader stream to send and receive from.</param>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.IsReady">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.DisposeAsync">
             <inheritdoc/>
         </member>
         <member name="T:RfidAssetReader3M.Rfid3MReader">

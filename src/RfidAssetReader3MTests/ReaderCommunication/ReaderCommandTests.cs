@@ -1,4 +1,4 @@
-namespace RfidAssetReader3MTests
+namespace RfidAssetReader3MTests.ReaderCommunication
 {
     using NUnit.Framework;
     using RfidAssetReader3M.ReaderCommunication;
