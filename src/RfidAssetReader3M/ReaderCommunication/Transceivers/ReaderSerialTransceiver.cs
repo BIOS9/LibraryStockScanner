@@ -63,7 +63,7 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         /// <inheritdoc/>
         public ValueTask DisposeAsync()
         {
-            // The serial port doesnt implement IAsyncDisposable :(
+            // The serial port doesnt implement IAsyncDisposable
             return this.tranceiver.DisposeAsync();
         }
     }
