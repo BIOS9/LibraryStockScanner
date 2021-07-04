@@ -1,5 +1,8 @@
 ﻿
 
+using RfidAssetReader3M.ReaderCommunication;
+using RfidAssetReader3MTests.Helpers;
+
 namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
 {
     using Moq;
@@ -78,6 +81,88 @@ namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
             t.DisposeAsync().AsTask().Wait();
 
             mock.Verify();
+        }
+
+        [Test]
+        public void TestNullTransceiveCommand()
+        {
+            Mock<Stream> mock = new Mock<Stream>();
+            mock.Setup(m => m.CanWrite).Returns(true);
+            mock.Setup(m => m.CanRead).Returns(true);
+
+            ReaderStreamTransceiver t = new ReaderStreamTransceiver(mock.Object);
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                t.Transceive(null);
+            });
+        }
+
+        [Test]
+        public void TestTransceiveCommand()
+        {
+            MemoryStream readStream = new MemoryStream(); // Stream that the transceiver reads from
+            MemoryStream writeStream = new MemoryStream(); // Stream that the transceiver writes to
+            BidirectionalMemoryStream stream = new BidirectionalMemoryStream(readStream, writeStream);
+
+            ReaderStreamTransceiver t = new ReaderStreamTransceiver(stream);
+
+            readStream.Write(new byte[] { 0xD6, 0x00, 0x07, 0xFE, 0x00, 0x00, 0x05, 0x00, 0xC9, 0x7B });
+
+            ReaderCommand expectedCommand = new ReaderCommand(CommunicationType.Operation, new byte[] { 0xFE, 0x00, 0x07 });
+            ReaderResponse response = t.Transceive(expectedCommand);
+
+            // Assert reader response is read correctly
+            Assert.AreEqual(new byte[] { 0xFE, 0x00, 0x00, 0x05, 0x00 }, response.Response.ToArray());
+            Assert.IsTrue(response.IsChecksumValid);
+            Assert.AreEqual(CommunicationType.Operation, response.CommunicationType);
+
+            // Assert reader command is sent correctly
+            byte[] buffer = new byte[expectedCommand.FullCommand.Length];
+            Assert.AreEqual(buffer.Length, writeStream.Length);
+            writeStream.Seek(-buffer.Length, SeekOrigin.End);
+            writeStream.Read(buffer, 0, buffer.Length);
+            Assert.AreEqual(expectedCommand.FullCommand.ToArray(), buffer);
+        }
+
+        [Test]
+        public void TestLargeTransceiveCommand()
+        {
+            MemoryStream readStream = new MemoryStream(); // Stream that the transceiver reads from
+            MemoryStream writeStream = new MemoryStream(); // Stream that the transceiver writes to
+            BidirectionalMemoryStream stream = new BidirectionalMemoryStream(readStream, writeStream, 10);
+
+            ReaderStreamTransceiver t = new ReaderStreamTransceiver(stream);
+
+            // Generate large reader command
+            byte[] commandData = new byte[253];
+            for (int i = 0; i < commandData.Length; ++i)
+            {
+                commandData[i] = (byte)(i.GetHashCode() ^ 1 & 0xFF);
+            }
+            ReaderCommand expectedCommand = new ReaderCommand(CommunicationType.Operation, commandData);
+
+            // Generate large reader response using the reader command class
+            byte[] responseData = new byte[253];
+            for (int i = 0; i < responseData.Length; ++i)
+            {
+                responseData[i] = (byte)(i.GetHashCode() & 0xFF);
+            }
+            ReaderCommand expectedResponse = new ReaderCommand(CommunicationType.Operation, responseData);
+
+            readStream.Write(expectedResponse.FullCommand);
+
+            ReaderResponse response = t.Transceive(expectedCommand);
+
+            // Assert reader response is read correctly
+            Assert.AreEqual(expectedResponse.FullCommand.ToArray(), response.FullResponse.ToArray());
+
+            // Assert reader command is sent correctly
+            byte[] buffer = new byte[expectedCommand.FullCommand.Length];
+            Assert.AreEqual(buffer.Length, writeStream.Length);
+            writeStream.Seek(-buffer.Length, SeekOrigin.End);
+            writeStream.Read(buffer, 0, buffer.Length);
+            Assert.AreEqual(expectedCommand.FullCommand.ToArray(), buffer);
         }
     }
 }

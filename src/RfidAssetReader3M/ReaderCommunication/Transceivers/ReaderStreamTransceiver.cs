@@ -46,6 +46,11 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         /// <inheritdoc/>
         public ReaderResponse Transceive(ReaderCommand command)
         {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
             // Send command
             this.stream.Write(command.FullCommand);
 
@@ -56,18 +61,21 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
             // Read header
             while (readCount < 3)
             {
-                readCount += this.stream.Read(readBuffer, 0, readBuffer.Length);
+                readCount += this.stream.Read(readBuffer, readCount, readBuffer.Length - readCount);
             }
 
             byte dataLength = readBuffer[2];
 
             // Read the data + checksum
-            while (readCount < dataLength + 3)
+            int dataReadCount = readCount - 3;
+            while (dataReadCount < dataLength)
             {
-                readCount += this.stream.Read(readBuffer, dataLength, dataLength + 3 - readCount);
+                int read = this.stream.Read(readBuffer, readCount, dataLength - dataReadCount);
+                readCount += read;
+                dataReadCount += read;
             }
 
-            return null;
+            return new ReaderResponse(((Span<byte>)readBuffer).Slice(0, readCount));
         }
 
         /// <inheritdoc/>
