@@ -1,6 +1,8 @@
 ﻿
 
 using RfidAssetReader3M.ReaderCommunication;
+using RfidAssetReader3M.ReaderCommunication.Commands;
+using RfidAssetReader3M.ReaderCommunication.Responses;
 using RfidAssetReader3MTests.Helpers;
 
 namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
@@ -9,9 +11,7 @@ namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
     using NUnit.Framework;
     using RfidAssetReader3M.ReaderCommunication.Transceivers;
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Text;
 
     public class ReaderStreamTransceiverTests
     {
@@ -94,7 +94,22 @@ namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
 
             Assert.Throws<ArgumentNullException>(() =>
             {
-                t.Transceive(null);
+                t.Transceive(null, RawResponse.Factory);
+            });
+        }
+
+        [Test]
+        public void TestNullTransceiveFactory()
+        {
+            Mock<Stream> mock = new Mock<Stream>();
+            mock.Setup(m => m.CanWrite).Returns(true);
+            mock.Setup(m => m.CanRead).Returns(true);
+
+            ReaderStreamTransceiver t = new ReaderStreamTransceiver(mock.Object);
+
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                t.Transceive(new RawCommand(CommunicationType.Operation, Span<byte>.Empty), null);
             });
         }
 
@@ -109,8 +124,8 @@ namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
 
             readStream.Write(new byte[] { 0xD6, 0x00, 0x07, 0xFE, 0x00, 0x00, 0x05, 0x00, 0xC9, 0x7B });
 
-            ReaderCommand expectedCommand = new ReaderCommand(CommunicationType.Operation, new byte[] { 0xFE, 0x00, 0x07 });
-            ReaderResponse response = t.Transceive(expectedCommand);
+            ReaderCommand expectedCommand = new RawCommand(CommunicationType.Operation, new byte[] { 0xFE, 0x00, 0x07 });
+            ReaderResponse response = t.Transceive(expectedCommand, RawResponse.Factory);
 
             // Assert reader response is read correctly
             Assert.AreEqual(new byte[] { 0xFE, 0x00, 0x00, 0x05, 0x00 }, response.Response.ToArray());
@@ -140,7 +155,7 @@ namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
             {
                 commandData[i] = (byte)(i.GetHashCode() ^ 1 & 0xFF);
             }
-            ReaderCommand expectedCommand = new ReaderCommand(CommunicationType.Operation, commandData);
+            ReaderCommand expectedCommand = new RawCommand(CommunicationType.Operation, commandData);
 
             // Generate large reader response using the reader command class
             byte[] responseData = new byte[253];
@@ -148,11 +163,11 @@ namespace RfidAssetReader3MTests.ReaderCommunication.Transceivers
             {
                 responseData[i] = (byte)(i.GetHashCode() & 0xFF);
             }
-            ReaderCommand expectedResponse = new ReaderCommand(CommunicationType.Operation, responseData);
+            ReaderCommand expectedResponse = new RawCommand(CommunicationType.Operation, responseData);
 
             readStream.Write(expectedResponse.FullCommand);
 
-            ReaderResponse response = t.Transceive(expectedCommand);
+            ReaderResponse response = t.Transceive(expectedCommand, RawResponse.Factory);
 
             // Assert reader response is read correctly
             Assert.AreEqual(expectedResponse.FullCommand.ToArray(), response.FullResponse.ToArray());

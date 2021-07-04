@@ -1,12 +1,12 @@
-﻿namespace RfidAssetReader3MTests.ReaderCommunication
-{
-    using NUnit.Framework;
-    using RfidAssetReader3M.ReaderCommunication;
-    using System;
-    using System.Collections.Generic;
-    using System.Data;
-    using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using NUnit.Framework;
+using RfidAssetReader3M.ReaderCommunication;
+using RfidAssetReader3M.ReaderCommunication.Responses;
 
+namespace RfidAssetReader3MTests.ReaderCommunication.Responses
+{
     public class ReaderResponseTests
     {
         struct ChecksumTestItem
@@ -55,25 +55,25 @@
             // Null response
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new ReaderResponse(null);
+                new RawResponse(null);
             });
 
             // Unknown CommunicationType
             Assert.Throws<ArgumentException>(() =>
             {
-                new ReaderResponse(new byte[] { 0x00, 0x00,  0x00, 0x00, 0x00, 0x00 });
+                new RawResponse(new byte[] { 0x00, 0x00,  0x00, 0x00, 0x00, 0x00 });
             });
 
             // Space byte not 0
             Assert.Throws<ArgumentException>(() =>
             {
-                new ReaderResponse(new byte[] { (byte)CommunicationType.Operation, 0x01,  0x00, 0x00, 0x00, 0x00 });
+                new RawResponse(new byte[] { (byte)CommunicationType.Operation, 0x01,  0x00, 0x00, 0x00, 0x00 });
             });
 
             // Data length less than 2
             Assert.Throws<ArgumentException>(() =>
             {
-                new ReaderResponse(new byte[] { (byte)CommunicationType.Operation, 0x00,  0x01, 0x00, 0x00, 0x00 });
+                new RawResponse(new byte[] { (byte)CommunicationType.Operation, 0x00,  0x01, 0x00, 0x00, 0x00 });
             });
         }
 
@@ -82,7 +82,7 @@
         {
             foreach (CommunicationType t in Enum.GetValues(typeof(CommunicationType)))
             {
-                ReaderResponse rr = new ReaderResponse(new byte[] { (byte)t, 0x00, 0x05, 0xFE, 0x00, 0x07, 0xDA, 0x02 });
+                ReaderResponse rr = new RawResponse(new byte[] { (byte)t, 0x00, 0x05, 0xFE, 0x00, 0x07, 0xDA, 0x02 });
                 Assert.AreEqual(t, rr.CommunicationType);
                 Assert.AreEqual((byte)t, rr.FullResponse[0]);
             }
@@ -101,14 +101,14 @@
 
                     if (i == j)
                     {
-                        ReaderResponse rr = new ReaderResponse(data, ignoreChecksum: true);
+                        ReaderResponse rr = new RawResponse(data, ignoreChecksum: true);
                         Assert.AreEqual(data, rr.FullResponse.ToArray());
                     }
                     else
                     {
                         Assert.Throws<ArgumentException>(() =>
                         {
-                            new ReaderResponse(data);
+                            new RawResponse(data);
                         });
                     }
                 }
@@ -117,7 +117,7 @@
             // Data too long.
             Assert.Throws<ArgumentException>(() =>
             {
-                new ReaderResponse(new byte[259], ignoreChecksum: true);
+                new RawResponse(new byte[259], ignoreChecksum: true);
             });
         }
 
@@ -133,7 +133,7 @@
                 }
                 data[0] = (byte)CommunicationType.Operation;
                 data[2] = (byte)(i - 3);
-                ReaderResponse rr = new ReaderResponse(data.ToArray(), ignoreChecksum: true);
+                ReaderResponse rr = new RawResponse(data.ToArray(), ignoreChecksum: true);
                 Assert.AreEqual(data.Slice(3, i - 5).ToArray(), rr.Response.ToArray());
             }
         }
@@ -150,21 +150,21 @@
                 Array.Copy(item.expectedChecksum, 0, fullResponse, fullResponse.Length - 2, 2);
 
                 // Valid checksum
-                ReaderResponse rr = new ReaderResponse(fullResponse);
+                ReaderResponse rr = new RawResponse(fullResponse);
                 Assert.AreEqual(item.expectedChecksum, rr.Checksum.ToArray());
                 Assert.IsTrue(rr.IsChecksumValid);
-                rr = new ReaderResponse(fullResponse);
+                rr = new RawResponse(fullResponse);
                 Assert.AreEqual(item.expectedChecksum, rr.Checksum.ToArray());
                 Assert.IsTrue(rr.IsChecksumValid);
 
                 // Invalid checksum
                 fullResponse[fullResponse.Length - 2] ^= 1;
                 fullResponse[fullResponse.Length - 1] ^= 1;
-                rr = new ReaderResponse(fullResponse, ignoreChecksum: true);
+                rr = new RawResponse(fullResponse, ignoreChecksum: true);
                 Assert.IsFalse(rr.IsChecksumValid);
                 Assert.Throws<DataException>(() => 
                 {
-                    new ReaderResponse(fullResponse);
+                    new RawResponse(fullResponse);
                 });
             }
         }
@@ -187,14 +187,14 @@
 
                 if (i >= 5 && i <= 258)
                 {
-                    ReaderResponse rr = new ReaderResponse(data, ignoreChecksum: true);
+                    ReaderResponse rr = new RawResponse(data, ignoreChecksum: true);
                     Assert.AreEqual(data, rr.FullResponse.ToArray());
                 } 
                 else
                 {
                     Assert.Throws<ArgumentException>(() =>
                     {
-                        new ReaderResponse(data, ignoreChecksum: true);
+                        new RawResponse(data, ignoreChecksum: true);
                     });
                 }
             }

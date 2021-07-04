@@ -1,18 +1,18 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ReaderResponse.cs" company="CIA">
+// <copyright file="RawResponse.cs" company="CIA">
 // Copyright (c) CIA. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace RfidAssetReader3M.ReaderCommunication
+namespace RfidAssetReader3M.ReaderCommunication.Responses
 {
     using System;
     using System.Data;
 
     /// <summary>
-    /// A command response sent back from the reader.
+    /// Represents a response object that handles header and checksum data.
     /// </summary>
-    internal class ReaderResponse
+    internal class RawResponse : ReaderResponse
     {
         /// <summary>
         /// The maximum possible size of a full response.
@@ -33,11 +33,11 @@ namespace RfidAssetReader3M.ReaderCommunication
         private readonly bool validChecksum;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReaderResponse"/> class.
+        /// Initializes a new instance of the <see cref="RawResponse"/> class.
         /// </summary>
         /// <param name="fullResponse">Full response from the reader including checksum and header.</param>
         /// <param name="ignoreChecksum">Allows continuing with an invalid checksum.</param>
-        public ReaderResponse(Span<byte> fullResponse, bool ignoreChecksum = false)
+        public RawResponse(Span<byte> fullResponse, bool ignoreChecksum = false)
         {
             if (fullResponse == null)
             {
@@ -105,32 +105,24 @@ namespace RfidAssetReader3M.ReaderCommunication
         }
 
         /// <summary>
-        /// Gets the communication type header byte.
+        /// Gets an instance of a factory that creates a new instance of <see cref="RawResponse"/>.
         /// </summary>
-        public CommunicationType CommunicationType => this.communicationType;
+        public static IResponseFactory Factory => new RawResponseFactory();
 
-        /// <summary>
-        /// Gets the raw command to send to the reader.
-        /// This does not include any of the header bytes or the checksum.
-        /// </summary>
-        public ReadOnlySpan<byte> Response => this.response;
+        /// <inheritdoc/>
+        public override CommunicationType CommunicationType => this.communicationType;
 
-        /// <summary>
-        /// Gets the modified CRC16-CCITT checksum of the data.
-        /// This checksum matches the format expected by the 3M RFID reader.
-        /// </summary>
-        public ReadOnlySpan<byte> Checksum => this.checksum;
+        /// <inheritdoc/>
+        public override ReadOnlySpan<byte> Response => this.response;
 
-        /// <summary>
-        /// Gets the full response from the reader including checksum and header.
-        /// </summary>
-        public ReadOnlySpan<byte> FullResponse => this.fullResponse;
+        /// <inheritdoc/>
+        public override ReadOnlySpan<byte> Checksum => this.checksum;
 
-        /// <summary>
-        /// Gets a value indicating whether the provided checksum matches the calculated
-        /// checksum of the data.
-        /// </summary>
-        public bool IsChecksumValid => this.validChecksum;
+        /// <inheritdoc/>
+        public override ReadOnlySpan<byte> FullResponse => this.fullResponse;
+
+        /// <inheritdoc/>
+        public override bool IsChecksumValid => this.validChecksum;
 
         private bool ValidateChecksum()
         {
@@ -141,6 +133,14 @@ namespace RfidAssetReader3M.ReaderCommunication
             Span<byte> checksumResult = BitConverter.GetBytes(Helpers.Checksum.CalculateCrc16(checksumData));
             checksumResult.Reverse(); // Swap endian
             return checksumResult.SequenceEqual(this.checksum);
+        }
+
+        private class RawResponseFactory : IResponseFactory
+        {
+            public ReaderResponse CreateFromData(Span<byte> data)
+            {
+                return new RawResponse(data);
+            }
         }
     }
 }

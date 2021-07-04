@@ -1,17 +1,19 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ReaderCommand.cs" company="CIA">
+// <copyright file="RawCommand.cs" company="CIA">
 // Copyright (c) CIA. All rights reserved.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace RfidAssetReader3M.ReaderCommunication
+namespace RfidAssetReader3M.ReaderCommunication.Commands
 {
     using System;
+    using RfidAssetReader3M.ReaderCommunication.Responses;
+    using RfidAssetReader3M.ReaderCommunication.Transceivers;
 
     /// <summary>
-    /// A command to send to the RFID reader.
+    /// Represents a command object that handles header and checksum data.
     /// </summary>
-    internal class ReaderCommand
+    internal class RawCommand : ReaderCommand
     {
         private readonly byte[] fullCommand;
         private readonly byte[] command;
@@ -19,11 +21,11 @@ namespace RfidAssetReader3M.ReaderCommunication
         private readonly CommunicationType communicationType;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReaderCommand"/> class.
+        /// Initializes a new instance of the <see cref="RawCommand"/> class.
         /// </summary>
         /// <param name="communicationType">The command type header byte.</param>
         /// <param name="command">Raw command to send to the reader.</param>
-        public ReaderCommand(CommunicationType communicationType, Span<byte> command)
+        public RawCommand(CommunicationType communicationType, Span<byte> command)
         {
             if (command == null)
             {
@@ -66,27 +68,22 @@ namespace RfidAssetReader3M.ReaderCommunication
             Array.Copy(this.checksum, 0, this.fullCommand, this.fullCommand.Length - 2, 2); // Copy checksum into fullCommand.
         }
 
-        /// <summary>
-        /// Gets the communication type header byte.
-        /// </summary>
-        public CommunicationType CommunicationType => this.communicationType;
+        /// <inheritdoc/>
+        public override CommunicationType CommunicationType => this.communicationType;
 
-        /// <summary>
-        /// Gets the raw command to send to the reader.
-        /// This does not include any of the header bytes or the checksum.
-        /// </summary>
-        public ReadOnlySpan<byte> Command => this.command;
+        /// <inheritdoc/>
+        public override ReadOnlySpan<byte> Command => this.command;
 
-        /// <summary>
-        /// Gets the modified CRC16-CCITT checksum of the data.
-        /// This checksum matches the format expected by the 3M RFID reader.
-        /// </summary>
-        public ReadOnlySpan<byte> Checksum => this.checksum;
+        /// <inheritdoc/>
+        public override ReadOnlySpan<byte> Checksum => this.checksum;
 
-        /// <summary>
-        /// Gets the full command containing all header information and the checksum.
-        /// The data is in the format expected by the 3M RFID reader.
-        /// </summary>
-        public ReadOnlySpan<byte> FullCommand => this.fullCommand;
+        /// <inheritdoc/>
+        public override ReadOnlySpan<byte> FullCommand => this.fullCommand;
+
+        /// <inheritdoc/>
+        public override RawResponse Send(IReaderTransceiver transceiver)
+        {
+            return (RawResponse)transceiver.Transceive(this, RawResponse.Factory);
+        }
     }
 }

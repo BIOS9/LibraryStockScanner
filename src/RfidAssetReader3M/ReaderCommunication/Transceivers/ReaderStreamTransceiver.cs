@@ -9,6 +9,8 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
     using System;
     using System.IO;
     using System.Threading.Tasks;
+    using RfidAssetReader3M.ReaderCommunication.Commands;
+    using RfidAssetReader3M.ReaderCommunication.Responses;
 
     /// <summary>
     /// Handles conversion between stream of data between the application and
@@ -44,18 +46,23 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         public bool IsReady => true;
 
         /// <inheritdoc/>
-        public ReaderResponse Transceive(ReaderCommand command)
+        public ReaderResponse Transceive(ReaderCommand command, IResponseFactory responseFactory)
         {
             if (command == null)
             {
                 throw new ArgumentNullException(nameof(command));
             }
 
+            if (responseFactory == null)
+            {
+                throw new ArgumentNullException(nameof(responseFactory));
+            }
+
             // Send command
             this.stream.Write(command.FullCommand);
 
             // Get response
-            byte[] readBuffer = new byte[ReaderResponse.MaxFullResponseSize];
+            byte[] readBuffer = new byte[RawResponse.MaxFullResponseSize];
             int readCount = 0;
 
             // Read header
@@ -75,7 +82,7 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
                 dataReadCount += read;
             }
 
-            return new ReaderResponse(((Span<byte>)readBuffer).Slice(0, readCount));
+            return responseFactory.CreateFromData(((Span<byte>)readBuffer).Slice(0, readCount));
         }
 
         /// <inheritdoc/>

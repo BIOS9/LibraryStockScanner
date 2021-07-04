@@ -17,6 +17,81 @@
             <param name="data">Input data for the checksum calculation.</param>
             <returns>16 bit unsigned integer checksum result.</returns>
         </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand">
+            <summary>
+            Represents a command that requests the RFID reader to return all present tags.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand"/> class.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand.Send(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver)">
+            <inheritdoc/>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand">
+            <summary>
+            Represents a command object that handles header and checksum data.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommunicationType,System.Span{System.Byte})">
+            <summary>
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand"/> class.
+            </summary>
+            <param name="communicationType">The command type header byte.</param>
+            <param name="command">Raw command to send to the reader.</param>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.CommunicationType">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.Command">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.Checksum">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.FullCommand">
+            <inheritdoc/>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.Send(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver)">
+            <inheritdoc/>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand">
+            <summary>
+            A command to send to the RFID reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand.CommunicationType">
+            <summary>
+            Gets the communication type header byte.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand.Command">
+            <summary>
+            Gets the raw command to send to the reader.
+            This does not include any of the header bytes or the checksum.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand.Checksum">
+            <summary>
+            Gets the modified CRC16-CCITT checksum of the data.
+            This checksum matches the format expected by the 3M RFID reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand.FullCommand">
+            <summary>
+            Gets the full command containing all header information and the checksum.
+            The data is in the format expected by the 3M RFID reader.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand.Send(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver)">
+            <summary>
+            Sends the command to the specified transceiver.
+            </summary>
+            <param name="transceiver">The transceiver that is connected to the RFID reader.</param>
+            <returns>The response from the RFID reader.</returns>
+        </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.CommunicationType">
             <summary>
             The type of command.
@@ -57,88 +132,106 @@
             <param name="message">Exception message.</param>
             <param name="innerException">Inner exception.</param>
         </member>
-        <member name="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand">
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Responses.IResponseFactory">
             <summary>
-            A command to send to the RFID reader.
+            Delegates instantiation of <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse"/> away from the calling class.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderCommand.#ctor(RfidAssetReader3M.ReaderCommunication.CommunicationType,System.Span{System.Byte})">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Responses.IResponseFactory.CreateFromData(System.Span{System.Byte})">
             <summary>
-            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand"/> class.
+            Creates a <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse"/> using data from the reader.
             </summary>
-            <param name="communicationType">The command type header byte.</param>
-            <param name="command">Raw command to send to the reader.</param>
+            <param name="data">Data to parse.</param>
+            <returns>A reader response containing the parsed data.</returns>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.CommunicationType">
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Responses.ListTagsResponse">
             <summary>
-            Gets the communication type header byte.
-            </summary>
-        </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.Command">
-            <summary>
-            Gets the raw command to send to the reader.
-            This does not include any of the header bytes or the checksum.
+            A response to a <see cref="T:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand"/>.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.Checksum">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Responses.ListTagsResponse.#ctor(System.Span{System.Byte})">
             <summary>
-            Gets the modified CRC16-CCITT checksum of the data.
-            This checksum matches the format expected by the 3M RFID reader.
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.ListTagsResponse"/> class.
+            </summary>
+            <param name="fullResponse">Full response from the RFID reader.</param>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.ListTagsResponse.Factory">
+            <summary>
+            Gets an instance of a factory that creates a new instance of <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.ListTagsResponse"/>.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderCommand.FullCommand">
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse">
             <summary>
-            Gets the full command containing all header information and the checksum.
-            The data is in the format expected by the 3M RFID reader.
+            Represents a response object that handles header and checksum data.
             </summary>
         </member>
-        <member name="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse">
-            <summary>
-            A command response sent back from the reader.
-            </summary>
-        </member>
-        <member name="F:RfidAssetReader3M.ReaderCommunication.ReaderResponse.MaxFullResponseSize">
+        <member name="F:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.MaxFullResponseSize">
             <summary>
             The maximum possible size of a full response.
             Max size is governed by the max data length (255 bytes) + the header (3 bytes).
             </summary>
         </member>
-        <member name="F:RfidAssetReader3M.ReaderCommunication.ReaderResponse.MinFullResponseSize">
+        <member name="F:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.MinFullResponseSize">
             <summary>
             The minimum possible size of a full response.
             The minimum size is 3 bytes for the header + 2 bytes for the checksum.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.ReaderResponse.#ctor(System.Span{System.Byte},System.Boolean)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.#ctor(System.Span{System.Byte},System.Boolean)">
             <summary>
-            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse"/> class.
+            Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse"/> class.
             </summary>
             <param name="fullResponse">Full response from the reader including checksum and header.</param>
             <param name="ignoreChecksum">Allows continuing with an invalid checksum.</param>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.CommunicationType">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.Factory">
+            <summary>
+            Gets an instance of a factory that creates a new instance of <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse"/>.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.CommunicationType">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.Response">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.Checksum">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.FullResponse">
+            <inheritdoc/>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse.IsChecksumValid">
+            <inheritdoc/>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse">
+            <summary>
+            A command response sent back from the reader.
+            </summary>
+        </member>
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse.CommunicationType">
             <summary>
             Gets the communication type header byte.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.Response">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse.Response">
             <summary>
             Gets the raw command to send to the reader.
             This does not include any of the header bytes or the checksum.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.Checksum">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse.Checksum">
             <summary>
             Gets the modified CRC16-CCITT checksum of the data.
             This checksum matches the format expected by the 3M RFID reader.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.FullResponse">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse.FullResponse">
             <summary>
             Gets the full response from the reader including checksum and header.
             </summary>
         </member>
-        <member name="P:RfidAssetReader3M.ReaderCommunication.ReaderResponse.IsChecksumValid">
+        <member name="P:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse.IsChecksumValid">
             <summary>
             Gets a value indicating whether the provided checksum matches the calculated
             checksum of the data.
@@ -154,11 +247,12 @@
             Gets a value indicating whether the channel is ready to communicate.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand,RfidAssetReader3M.ReaderCommunication.Responses.IResponseFactory)">
             <summary>
             Communicates with a reader by sending a command and then reading the response.
             </summary>
             <param name="command">Command that will be sent to the reader.</param>
+            <param name="responseFactory">Response factory that will be used to create a response object.</param>
             <returns>The response to the command that was sent to the reader.</returns>
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver">
@@ -176,7 +270,7 @@
         <member name="P:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.IsReady">
             <inheritdoc/>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand,RfidAssetReader3M.ReaderCommunication.Responses.IResponseFactory)">
             <inheritdoc/>
         </member>
         <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderSerialTransceiver.Dispose">
@@ -191,8 +285,8 @@
             reader to distinct commands and responses.
             </summary>
             <seealso cref="T:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver"/>
-            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.ReaderCommand"/>
-            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.ReaderResponse"/>
+            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand"/>
+            <seealso cref="T:RfidAssetReader3M.ReaderCommunication.Responses.ReaderResponse"/>
         </member>
         <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.#ctor(System.IO.Stream)">
             <summary>
@@ -203,7 +297,7 @@
         <member name="P:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.IsReady">
             <inheritdoc/>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.ReaderCommand)">
+        <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.Transceive(RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand,RfidAssetReader3M.ReaderCommunication.Responses.IResponseFactory)">
             <inheritdoc/>
         </member>
         <member name="M:RfidAssetReader3M.ReaderCommunication.Transceivers.ReaderStreamTransceiver.Dispose">

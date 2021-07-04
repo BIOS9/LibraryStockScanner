@@ -8,12 +8,17 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
 {
     using System;
     using System.IO.Ports;
+    using System.Runtime.Versioning;
     using System.Threading.Tasks;
+    using RfidAssetReader3M.ReaderCommunication.Commands;
+    using RfidAssetReader3M.ReaderCommunication.Responses;
 
     /// <summary>
     /// A reader channel that uses a serial port for
     /// the underlying communication.
     /// </summary>
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("ios")]
     internal class ReaderSerialTransceiver : IReaderTransceiver, IDisposable, IAsyncDisposable
     {
         private const int SerialBaudRate = 19200;
@@ -22,7 +27,7 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         private const StopBits SerialStopBits = StopBits.One;
 
         private readonly SerialPort serialPort;
-        private ReaderStreamTransceiver tranceiver;
+        private readonly ReaderStreamTransceiver tranceiver;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReaderSerialTransceiver"/> class.
@@ -43,14 +48,14 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         public bool IsReady => this.serialPort.IsOpen && this.tranceiver.IsReady;
 
         /// <inheritdoc/>
-        public ReaderResponse Transceive(ReaderCommand command)
+        public ReaderResponse Transceive(ReaderCommand command, IResponseFactory responseFactory)
         {
             if (!this.serialPort.IsOpen)
             {
                 throw new NotConnectedException("Serial port is not open.");
             }
 
-            return this.tranceiver.Transceive(command);
+            return this.tranceiver.Transceive(command, responseFactory);
         }
 
         /// <inheritdoc/>

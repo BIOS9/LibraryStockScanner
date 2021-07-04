@@ -5,6 +5,9 @@
 // -----------------------------------------------------------------------
 
 using System.Runtime.CompilerServices;
+using RfidAssetReader3M.ReaderCommunication.Commands;
+using RfidAssetReader3M.ReaderCommunication.Responses;
+using RfidAssetReader3M.ReaderCommunication.Transceivers;
 
 [assembly: InternalsVisibleTo("RfidAssetReader3MTests")]
 
