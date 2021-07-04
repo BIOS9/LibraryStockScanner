@@ -40,7 +40,7 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         }
 
         /// <inheritdoc/>
-        public bool IsReady => throw new NotImplementedException();
+        public bool IsReady => this.serialPort.IsOpen && this.tranceiver.IsReady;
 
         /// <inheritdoc/>
         public ReaderResponse Transceive(ReaderCommand command)
