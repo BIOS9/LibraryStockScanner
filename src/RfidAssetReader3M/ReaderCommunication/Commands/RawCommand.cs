@@ -79,11 +79,5 @@ namespace RfidAssetReader3M.ReaderCommunication.Commands
 
         /// <inheritdoc/>
         public override ReadOnlySpan<byte> FullCommand => this.fullCommand;
-
-        /// <inheritdoc/>
-        public override RawResponse Send(IReaderTransceiver transceiver)
-        {
-            return (RawResponse)transceiver.Transceive(this, RawResponse.Factory);
-        }
     }
 }

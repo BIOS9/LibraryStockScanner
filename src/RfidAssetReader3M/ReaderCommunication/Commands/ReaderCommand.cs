@@ -37,12 +37,5 @@ namespace RfidAssetReader3M.ReaderCommunication.Commands
         /// The data is in the format expected by the 3M RFID reader.
         /// </summary>
         public abstract ReadOnlySpan<byte> FullCommand { get; }
-
-        /// <summary>
-        /// Sends the command to the specified transceiver.
-        /// </summary>
-        /// <param name="transceiver">The transceiver that is connected to the RFID reader.</param>
-        /// <returns>The response from the RFID reader.</returns>
-        public abstract ReaderResponse Send(IReaderTransceiver transceiver);
     }
 }

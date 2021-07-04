@@ -27,9 +27,6 @@
             Initializes a new instance of the <see cref="T:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand"/> class.
             </summary>
         </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand.Send(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver)">
-            <inheritdoc/>
-        </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand">
             <summary>
             Represents a command object that handles header and checksum data.
@@ -52,9 +49,6 @@
             <inheritdoc/>
         </member>
         <member name="P:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.FullCommand">
-            <inheritdoc/>
-        </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand.Send(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver)">
             <inheritdoc/>
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand">
@@ -84,13 +78,6 @@
             Gets the full command containing all header information and the checksum.
             The data is in the format expected by the 3M RFID reader.
             </summary>
-        </member>
-        <member name="M:RfidAssetReader3M.ReaderCommunication.Commands.ReaderCommand.Send(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver)">
-            <summary>
-            Sends the command to the specified transceiver.
-            </summary>
-            <param name="transceiver">The transceiver that is connected to the RFID reader.</param>
-            <returns>The response from the RFID reader.</returns>
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.CommunicationType">
             <summary>
@@ -236,6 +223,32 @@
             Gets a value indicating whether the provided checksum matches the calculated
             checksum of the data.
             </summary>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.TransceiverExtensions.ListTagsCommandExtension">
+            <summary>
+            Adds extension methods to transceivers to provide an easy way send and receive list tag commands.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.TransceiverExtensions.ListTagsCommandExtension.GetListTagsResponse(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver,RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand)">
+            <summary>
+            Send a <see cref="T:RfidAssetReader3M.ReaderCommunication.Commands.ListTagsCommand"/> to a transceiver and return <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.ListTagsResponse"/>.
+            </summary>
+            <param name="transceiver">Transceiver that is connected to an RFID reader.</param>
+            <param name="command">Command to send to the reader.</param>
+            <returns>Response from the reader.</returns>
+        </member>
+        <member name="T:RfidAssetReader3M.ReaderCommunication.TransceiverExtensions.RawCommandExtension">
+            <summary>
+            Adds extension methods to transceivers to provide an easy way send and receive raw commands.
+            </summary>
+        </member>
+        <member name="M:RfidAssetReader3M.ReaderCommunication.TransceiverExtensions.RawCommandExtension.GetRawResponse(RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver,RfidAssetReader3M.ReaderCommunication.Commands.RawCommand)">
+            <summary>
+            Send a <see cref="T:RfidAssetReader3M.ReaderCommunication.Commands.RawCommand"/> to a transceiver and return <see cref="T:RfidAssetReader3M.ReaderCommunication.Responses.RawResponse"/>.
+            </summary>
+            <param name="transceiver">Transceiver that is connected to an RFID reader.</param>
+            <param name="command">Command to send to the reader.</param>
+            <returns>Response from the reader.</returns>
         </member>
         <member name="T:RfidAssetReader3M.ReaderCommunication.Transceivers.IReaderTransceiver">
             <summary>

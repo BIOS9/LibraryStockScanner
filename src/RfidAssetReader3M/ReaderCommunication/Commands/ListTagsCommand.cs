@@ -21,11 +21,5 @@ namespace RfidAssetReader3M.ReaderCommunication.Commands
             : base(CommunicationType.Operation, new byte[] { })
         {
         }
-
-        /// <inheritdoc/>
-        public override ListTagsResponse Send(IReaderTransceiver transceiver)
-        {
-            return (ListTagsResponse)transceiver.Transceive(this, ListTagsResponse.Factory);
-        }
     }
 }
