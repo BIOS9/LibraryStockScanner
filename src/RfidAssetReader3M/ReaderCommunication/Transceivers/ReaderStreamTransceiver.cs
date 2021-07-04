@@ -73,7 +73,7 @@ namespace RfidAssetReader3M.ReaderCommunication.Transceivers
         /// <inheritdoc/>
         public void Dispose()
         {
-            this.stream.Dispose();
+             this.stream.Dispose();
         }
 
         /// <inheritdoc/>
